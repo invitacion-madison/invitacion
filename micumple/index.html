@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invitación Bautizo + Cumpleaños</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <!-- Invitación -->
+
+
+  <audio id="musica" loop>
+    <source src="img/cancion.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="control-musica">
+    <button id="botonMusica" onclick="controlarMusica()">
+     🎵 ▶ Reproducir
+    </button>
+  </div>
+  <section class="lado cumple">
+
+    <video class="video-fondo" autoplay muted loop playsinline>
+     <source src="img/plantilla.mp4" type="video/mp4">
+    </video>
+
+  </section>
+
+
+  <section class="lado bautizo"></section>
+
+
+  <section class="ubicacion">
+
+    <h2>📍Ubicaciones</h2>
+
+    <button onclick="window.open('https://maps.google.com')">
+     Ver ubicación fiesta
+    </button>
+    <button class="boton-ubicacion"
+     onclick="window.open('https://www.google.com/maps/place/Iglesia+San+Judas+Tadeo/@22.0008907,-98.9982168,16.5z/data=!4m15!1m8!3m7!1s0x85d60d65071e7df7:0x1882000edbbc8be!2sSan+Judas+Tadeo,+La+Estrella,+79023+Cdad.+Valles,+S.L.P.!3b1!8m2!3d22.0224194!4d-99.0210882!16s%2Fg%2F1vbl7yjg!3m5!1s0x85d612b7848dfab9:0xe8631be5e6b5f373!8m2!3d22.0024328!4d-98.9931517!16s%2Fg%2F11c47t64t6?entry=ttu&g_ep=EgoyMDI2MDkwMi4wIKXMDSoASAFQAw%3D%3D')">
+     📍 Ver ubicación de la misa
+    </button>
+  </section>
+
+
+  <section class="confirmacion">
+
+    <h2>¿Nos acompañas?</h2>
+
+    <button onclick="mostrarFormulario()">
+      Sí asistiré 💛
+    </button>
+
+    <button onclick="noAsiste()">
+      No podré asistir
+    </button>
+    <div id="formulario">
+
+      <input
+       type="text"
+       id="nombre"
+       placeholder="Nombre de la familia"
+      >
+
+      <input
+       type="number"
+       id="personas"
+       placeholder="¿Cuántos asistirán?"
+       min="1"
+      >
+
+      <textarea
+       id="mensaje"
+       placeholder="Déjanos un mensaje 💛(opcional)"
+      ></textarea>
+
+      <button onclick="confirmarAsistencia()">
+       Confirmar asistencia
+      </button>
+
+    </div>
+
+    <p id="gracias"></p>
+
+  </section>
+
+  <!-- Ventana de mensajes -->
+
+    <div id="popup" class="mensaje-popup"> 
+      <img src="img/abeja.gif" class="abejita-popup"> 
+      <h3 id="popupTitulo"></h3> 
+      <p id="popupTexto"></p> 
+      <button onclick="cerrarPopup()">Aceptar
+      </button> 
+    </div>
+
+  <!-- Firebase -->
+
+  <script type="module">
+
+    import { initializeApp }
+      from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+
+    import {
+      getFirestore,
+      collection,
+      addDoc
+    }
+      from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+
+    const firebaseConfig = {
+
+      apiKey: "AIzaSyCyCDHZU4aybUQ715wR7TUr9EZSGXI7GIU",
+
+      authDomain: "invitacion-8aabc.firebaseapp.com",
+
+      projectId: "invitacion-8aabc",
+
+      storageBucket: "invitacion-8aabc.firebasestorage.app",
+
+      messagingSenderId: "227896735643",
+
+      appId: "1:227896735643:web:42eee6643da0160a1f533e",
+
+      measurementId: "G-L6MNRT6PG8"
+
+    };
+
+
+    const app = initializeApp(firebaseConfig);
+
+    const db = getFirestore(app);
+
+
+    window.confirmarAsistencia = async function () {
+
+      const nombreInput =
+        document.getElementById("nombre");
+
+      const personasInput =
+        document.getElementById("personas");
+
+      const mensajeInput =
+        document.getElementById("mensaje");
+
+
+      const nombre =
+        nombreInput.value.trim();
+
+      const personas =
+        Number(personasInput.value);
+
+      const mensaje =
+        mensajeInput.value.trim();
+
+
+      if (!nombre) {
+
+        mostrarPopup(
+          "⚠️ Falta tu nombre",
+          "Por favor, rellena tu nombre para continuar."
+        );
+
+        return;
+      }
+
+
+      if (!personas || personas < 1) {
+
+        mostrarPopup(
+          "⚠️ Falta un dato",
+          "Por favor, indica cuántas personas asistirán."
+        );
+
+        return;
+      }
+
+
+      try {
+
+        await addDoc(
+          collection(db, "invitados"),
+          {
+            nombre: nombre,
+            asistencia: true,
+            personas: personas,
+            mensaje: mensaje
+          }
+        );
+
+
+        document.getElementById("formulario").style.display = "none";
+
+
+        mostrarPopup(
+          "💛 ¡Muchas gracias!",
+          "Tu asistencia ha sido confirmada. ¡Te esperamos ahí!"
+        );
+
+
+        nombreInput.value = "";
+        personasInput.value = "";
+        mensajeInput.value = "";
+
+
+      } catch (error) {
+
+        console.error("Error al guardar:", error);
+
+        mostrarPopup(
+          "❌ Ocurrió un error",
+          "No pudimos guardar tu confirmación. Inténtalo nuevamente."
+        );
+
+      }
+
+    };
+
+  </script>
+
+  <!-- JavaScript de la invitación -->
+
+  <script src="script.js"></script>
+
+</body>
+
+</html>
