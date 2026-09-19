@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Invitación Bautizo + Cumpleaños</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- =========================
+       MÚSICA
+       ========================= -->
+
+  <audio id="musica" loop>
+    <source src="img/cancion.mp3" type="audio/mpeg">
+  </audio>
+
+
+  <!-- =========================
+       LADO CUMPLEAÑOS
+       ========================= -->
+
+  <section class="lado cumple">
+
+    <video class="video-fondo" autoplay muted loop playsinline>
+      <source src="img/plantilla.mp4" type="video/mp4">
+    </video>
+
+  </section>
+
+
+  <!-- =========================
+       LADO BAUTIZO
+       ========================= -->
+
+  <section class="lado bautizo"></section>
+
+
+  <!-- =========================
+       UBICACIONES
+       ========================= -->
+
+  <section class="ubicacion">
+
+    <h2>
+      <img src="img/ubi.gif" class="icono-ubicacion" alt="">
+      Ubicaciones
+    </h2>
+
+    <button onclick="window.open('https://maps.google.com', '_blank')">
+      <img src="img/ubi2.gif" class="icono-boton" alt="">
+      Ver ubicación fiesta
+    </button>
+
+    <button
+      class="boton-ubicacion"
+      onclick="window.open('https://www.google.com/maps/place/Iglesia+San+Judas+Tadeo/@22.0025736,-98.9954547,17.25z/data=!4m15!1m8!3m7!1s0x85d66d43ad51a037:0x1d75e4508dffe68!2sSan+Luis,+Cdad.+Valles,+S.L.P.!3b1!8m2!3d21.9710032!4d-98.9983896!16s%2Fg%2F1tcvv67l!3m5!1s0x85d612b7848dfab9:0xe8631be5e6b5f373!8m2!3d22.0024328!4d-98.9931517!16s%2Fg%2F11c47t64t6?entry=ttu&g_ep=EgoyMDI2MDkxNi4wIKXMDSoASAFQAw%3D%3D', '_blank')">
+
+      <img src="img/ubi2.gif" class="icono-boton" alt="">
+      Ver ubicación de la misa
+
+    </button>
+
+  </section>
+
+
+  <!-- =========================
+       CONFIRMACIÓN
+       ========================= -->
+
+  <section class="confirmacion">
+
+    <h2>¿Nos acompañas?</h2>
+
+    <button onclick="mostrarFormulario()">
+      Sí asistiré 💛
+    </button>
+
+    <button onclick="noAsiste()">
+      No podré asistir
+    </button>
+
+
+    <div id="formulario">
+
+      <input
+        type="text"
+        id="nombre"
+        placeholder="Nombre de la familia"
+      >
+
+      <input
+        type="number"
+        id="personas"
+        placeholder="¿Cuántos asistirán?"
+        min="1"
+      >
+
+      <select id="evento">
+
+        <option value="">
+          ¿A qué celebración nos acompañarás?
+        </option>
+
+        <option value="Ambas celebraciones">
+          Ambas celebraciones
+        </option>
+
+        <option value="Cumpleaños">
+          Cumpleaños
+        </option>
+
+        <option value="Bautizo">
+          Bautizo
+        </option>
+
+      </select>
+
+      <textarea
+        id="mensaje"
+        placeholder="Déjanos un mensaje 💛 (opcional)"
+      ></textarea>
+
+      <button onclick="confirmarAsistencia()">
+        Confirmar asistencia
+      </button>
+
+    </div>
+
+    <p id="gracias"></p>
+
+  </section>
+
+
+  <!-- =========================
+       POPUP
+       ========================= -->
+
+  <div id="popup" class="mensaje-popup">
+
+    <img
+      src="img/abeja.gif"
+      class="abejita-popup"
+      alt=""
+    >
+
+    <h3 id="popupTitulo"></h3>
+
+    <p id="popupTexto"></p>
+
+    <button onclick="cerrarPopup()">
+      Aceptar
+    </button>
+
+  </div>
+
+
+  <!-- =========================
+       FIREBASE
+       ========================= -->
+       <script type="module">
+
+  import {
+    initializeApp
+  } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    doc,
+    getDoc,
+    updateDoc,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+  import {
+    getAuth,
+    signInAnonymously
+  } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+
+
+  /* =========================
+     CONFIGURACIÓN FIREBASE
+     ========================= */
+
+  const firebaseConfig = {
+
+    apiKey:
+      "AIzaSyCyCDHZU4aybUQ715wR7TUr9EZSGXI7GIU",
+
+    authDomain:
+      "invitacion-8aabc.firebaseapp.com",
+
+    projectId:
+      "invitacion-8aabc",
+
+    storageBucket:
+      "invitacion-8aabc.firebasestorage.app",
+
+    messagingSenderId:
+      "227896735643",
+
+    appId:
+      "1:227896735643:web:42eee6643da0160a1f533e",
+
+    measurementId:
+      "G-L6MNRT6PG8"
+  };
+
+
+  /* =========================
+     INICIALIZAR FIREBASE
+     ========================= */
+
+  const app =
+    initializeApp(firebaseConfig);
+
+  const db =
+    getFirestore(app);
+
+  const auth =
+    getAuth(app);
+
+
+  /* =========================
+     CLAVES LOCALSTORAGE
+     ========================= */
+
+  const claveConfirmacion =
+    "confirmacion_invitacion_id";
+
+  const claveOwnerUid =
+    "confirmacion_owner_uid";
+
+
+  /* =========================
+     VARIABLES
+     ========================= */
+
+  let usuarioAnonimo = null;
+  let musicaPendiente = false;
+
+
+  /* =========================
+     ELEMENTOS DEL DOM
+     ========================= */
+
+  const musica =
+    document.getElementById("musica");
+
+  const formulario =
+    document.getElementById("formulario");
+
+  const nombreInput =
+    document.getElementById("nombre");
+
+  const personasInput =
+    document.getElementById("personas");
+
+  const eventoInput =
+    document.getElementById("evento");
+
+  const mensajeInput =
+    document.getElementById("mensaje");
+
+  const confirmacion =
+    document.querySelector(".confirmacion");
+
+
+  /* =========================
+     ESTADO DE CONFIRMACIÓN
+     ========================= */
+
+  const estadoConfirmacion =
+    document.createElement("div");
+
+  estadoConfirmacion.id =
+    "estadoConfirmacion";
+
+  confirmacion.appendChild(
+    estadoConfirmacion
+  );
+
+
+  /* =========================
+     MÚSICA
+     ========================= */
+
+  window.addEventListener("load", () => {
+
+    setTimeout(() => {
+
+      musicaPendiente = true;
+
+      mostrarPopup(
+        "Una pequeña recomendación",
+        "Esta invitación cuenta con música de fondo que acompañará este momento especial. Te recomendamos ajustar el volumen de tu dispositivo a un nivel cómodo antes de continuar."
+      );
+
+    }, 500);
+
+  });
+
+
+  /* =========================
+     INICIAR MÚSICA
+     ========================= */
+
+  async function iniciarMusica() {
+
+    try {
+
+      await musica.play();
+
+      musicaPendiente = false;
+
+      console.log(
+        "Música iniciada correctamente."
+      );
+
+    } catch (error) {
+
+      console.error(
+        "No fue posible iniciar la música:",
+        error
+      );
+
+    }
+
+  }
+
+
+  /* =========================
+     AUTENTICACIÓN
+     ========================= */
+
+  try {
+
+    if (auth.currentUser) {
+
+      usuarioAnonimo =
+        auth.currentUser;
+
+    } else {
+
+      const resultado =
+        await signInAnonymously(auth);
+
+      usuarioAnonimo =
+        resultado.user;
+
+    }
+
+
+    console.log(
+      "Usuario anónimo conectado:",
+      usuarioAnonimo.uid
+    );
+
+
+    const ownerUidGuardado =
+      localStorage.getItem(
+        claveOwnerUid
+      );
+
+    const idGuardado =
+      localStorage.getItem(
+        claveConfirmacion
+      );
+
+
+    if (
+      idGuardado &&
+      !ownerUidGuardado
+    ) {
+
+      localStorage.removeItem(
+        claveConfirmacion
+      );
+
+    }
+
+
+    if (
+      ownerUidGuardado &&
+      ownerUidGuardado !==
+      usuarioAnonimo.uid
+    ) {
+
+      localStorage.removeItem(
+        claveConfirmacion
+      );
+
+      localStorage.removeItem(
+        claveOwnerUid
+      );
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Error de autenticación:",
+      error
+    );
+
+    mostrarPopup(
+      "Aviso",
+      "No fue posible conectar correctamente con el sistema de confirmaciones. Por favor, intenta nuevamente."
+    );
+
+  }
+
+
+  /* =========================
+     OCULTAR BOTONES
+     ========================= */
+
+  function ocultarBotonesIniciales() {
+
+    const botones =
+      confirmacion.querySelectorAll(
+        ":scope > button"
+      );
+
+    botones.forEach(boton => {
+
+      boton.style.display =
+        "none";
+
+    });
+
+  }
+
+
+  /* =========================
+     MOSTRAR BOTONES
+     ========================= */
+
+  function mostrarBotonesIniciales() {
+
+    const botones =
+      confirmacion.querySelectorAll(
+        ":scope > button"
+      );
+
+
+    if (botones[0]) {
+
+      botones[0].style.display =
+        "inline-block";
+
+      botones[0].onclick =
+        mostrarFormulario;
+
+    }
+
+
+    if (botones[1]) {
+
+      botones[1].style.display =
+        "inline-block";
+
+      botones[1].onclick =
+        noAsiste;
+
+    }
+
+  }
+
+
+  /* =========================
+     MOSTRAR ESTADO CONFIRMADO
+     ========================= */
+
+  function mostrarEstadoConfirmado() {
+
+    ocultarBotonesIniciales();
+
+    formulario.style.display =
+      "none";
+
+
+    estadoConfirmacion.innerHTML = `
+
+      <p style="
+        font-size:18px;
+        margin-bottom:15px;
+        color:#555;
+      ">
+        💛 Ya registraste tu asistencia
+      </p>
+
+      <button
+        onclick="editarConfirmacion()"
+      >
+        Editar mi confirmación
+      </button>
+
+      <button
+        class="boton-no-asiste"
+        onclick="noAsiste()"
+      >
+        No podré acompañarlos en ninguna de las dos celebraciones
+      </button>
+
+    `;
+
+  }
+
+
+  /* =========================
+     EDITAR CONFIRMACIÓN
+     ========================= */
+
+  window.editarConfirmacion =
+    async function () {
+
+      try {
+
+        const id =
+          localStorage.getItem(
+            claveConfirmacion
+          );
+
+
+        if (!id) {
+
+          mostrarBotonesIniciales();
+
+          return;
+
+        }
+
+
+        if (!usuarioAnonimo) {
+
+          mostrarAdvertencia(
+            "Conexión no disponible",
+            "Espera unos segundos e intenta nuevamente."
+          );
+
+          return;
+
+        }
+
+
+        const referencia =
+          doc(
+            db,
+            "invitados",
+            id
+          );
+
+
+        const resultado =
+          await getDoc(
+            referencia
+          );
+
+
+        if (!resultado.exists()) {
+
+          localStorage.removeItem(
+            claveConfirmacion
+          );
+
+          localStorage.removeItem(
+            claveOwnerUid
+          );
+
+          mostrarBotonesIniciales();
+
+          return;
+
+        }
+
+
+        const datos =
+          resultado.data();
+
+
+        if (
+          datos.ownerUid !==
+          usuarioAnonimo.uid
+        ) {
+
+          localStorage.removeItem(
+            claveConfirmacion
+          );
+
+          localStorage.removeItem(
+            claveOwnerUid
+          );
+
+          mostrarBotonesIniciales();
+
+          return;
+
+        }
+
+
+        nombreInput.value =
+          datos.nombre || "";
+
+        personasInput.value =
+          datos.personas || "";
+
+        eventoInput.value =
+          datos.evento || "";
+
+        mensajeInput.value =
+          datos.mensaje || "";
+
+
+        formulario.style.display =
+          "block";
+
+        estadoConfirmacion.innerHTML =
+          "";
+
+
+        const botones =
+          confirmacion.querySelectorAll(
+            ":scope > button"
+          );
+
+
+        botones.forEach(boton => {
+
+          boton.style.display =
+            "none";
+
+        });
+
+
+        const botonFormulario =
+          formulario.querySelector(
+            "button"
+          );
+
+
+        if (botonFormulario) {
+
+          botonFormulario.textContent =
+            "Guardar cambios";
+
+        }
+
+      } catch (error) {
+
+        console.error(
+          "Error al editar:",
+          error
+        );
+
+        mostrarAdvertencia(
+          "No fue posible editar",
+          "Ocurrió un problema al cargar tu confirmación. Intenta nuevamente."
+        );
+
+      }
+
+    };
+
+
+  /* =========================
+     NO ASISTE
+     ========================= */
+
+  window.noAsiste =
+    function () {
+
+      mostrarPopup(
+        "Confirmación",
+        "Si seleccionas esta opción, registraremos que no podrás acompañarnos. Puedes cambiar tu respuesta posteriormente."
+      );
+
+
+      estadoConfirmacion.innerHTML = `
+
+        <button
+          class="boton-no-asiste"
+          onclick="noAsistireDefinitivo()"
+        >
+          Confirmar que no asistiré
+        </button>
+
+      `;
+
+    };
+
+
+  /* =========================
+     CREAR REGISTRO
+     NO ASISTIRÁ
+     ========================= */
+
+  async function crearNoAsistencia() {
+
+    if (!usuarioAnonimo) {
+
+      throw new Error(
+        "Usuario no autenticado"
+      );
+
+    }
+
+
+    const nuevoRegistro =
+      await addDoc(
+        collection(
+          db,
+          "invitados"
+        ),
+        {
+
+          nombre:
+            "Sin confirmar nombre",
+
+          asistencia:
+            false,
+
+          personas:
+            0,
+
+          evento:
+            "No podrá asistir",
+
+          mensaje:
+            "",
+
+          ownerUid:
+            usuarioAnonimo.uid,
+
+          fechaRegistro:
+            serverTimestamp(),
+
+          ultimaModificacion:
+            serverTimestamp()
+
+        }
+      );
+
+
+    localStorage.setItem(
+      claveConfirmacion,
+      nuevoRegistro.id
+    );
+
+    localStorage.setItem(
+      claveOwnerUid,
+      usuarioAnonimo.uid
+    );
+
+
+    console.log(
+      "No asistencia guardada:",
+      nuevoRegistro.id
+    );
+
+
+    return nuevoRegistro.id;
+
+  }
+
+
+  /* =========================
+     NO ASISTIRÉ DEFINITIVO
+     ========================= */
+
+  window.noAsistireDefinitivo =
+    async function () {
+
+      try {
+
+        if (!usuarioAnonimo) {
+
+          mostrarAdvertencia(
+            "No fue posible continuar",
+            "La conexión todavía no está disponible. Intenta nuevamente."
+          );
+
+          return;
+
+        }
+
+
+        const id =
+          localStorage.getItem(
+            claveConfirmacion
+          );
+
+
+        /* =========================
+           YA EXISTE REGISTRO
+           ========================= */
+
+        if (id) {
+
+          const referencia =
+            doc(
+              db,
+              "invitados",
+              id
+            );
+
+
+          const resultado =
+            await getDoc(
+              referencia
+            );
+
+
+          if (resultado.exists()) {
+
+            const datos =
+              resultado.data();
+
+
+            if (
+              datos.ownerUid !==
+              usuarioAnonimo.uid
+            ) {
+
+              localStorage.removeItem(
+                claveConfirmacion
+              );
+
+              localStorage.removeItem(
+                claveOwnerUid
+              );
+
+              mostrarBotonesIniciales();
+
+              return;
+
+            }
+
+
+            await updateDoc(
+              referencia,
+              {
+
+                asistencia:
+                  false,
+
+                evento:
+                  "No podrá asistir",
+
+                ultimaModificacion:
+                  serverTimestamp()
+
+              }
+            );
+
+
+          } else {
+
+            localStorage.removeItem(
+              claveConfirmacion
+            );
+
+            localStorage.removeItem(
+              claveOwnerUid
+            );
+
+
+            await crearNoAsistencia();
+
+          }
+
+
+        } else {
+
+          /* =========================
+             PRIMERA VEZ
+             NO ASISTIRÁ
+             ========================= */
+
+          await crearNoAsistencia();
+
+        }
+
+
+        /* =========================
+           MOSTRAR ESTADO
+           ========================= */
+
+        ocultarBotonesIniciales();
+
+        formulario.style.display =
+          "none";
+
+
+        estadoConfirmacion.innerHTML = `
+
+          <p style="
+            font-size:18px;
+            color:#555;
+            margin-bottom:15px;
+          ">
+            💛 No podrás acompañarnos
+          </p>
+
+          <button
+            class="boton-no-asiste"
+            onclick="cambiarOpinion()"
+          >
+            Cambiar de opinión
+          </button>
+
+        `;
+
+
+        /* =========================
+           MOSTRAR POPUP
+           ========================= */
+
+        mostrarPopup(
+          "Muchas gracias",
+          "Hemos registrado tu respuesta. Si posteriormente deseas cambiarla, podrás hacerlo desde esta misma invitación."
+        );
+
+
+      } catch (error) {
+
+        console.error(
+          "Error al registrar que no asistirá:",
+          error
+        );
+
+
+        if (
+          error.code ===
+          "permission-denied"
+        ) {
+
+          mostrarAdvertencia(
+            "No fue posible guardar",
+            "El sistema no permitió registrar tu respuesta. Revisa los permisos de Firebase."
+          );
+
+        } else {
+
+          mostrarAdvertencia(
+            "No fue posible guardar",
+            "Ocurrió un problema al registrar tu respuesta. Intenta nuevamente."
+          );
+
+        }
+
+      }
+
+    };
+
+
+  /* =========================
+     CAMBIAR DE OPINIÓN
+     ========================= */
+
+  window.cambiarOpinion =
+    function () {
+
+      mostrarBotonesIniciales();
+
+      formulario.style.display =
+        "none";
+
+      estadoConfirmacion.innerHTML =
+        "";
+
+    };
+
+
+  /* =========================
+     MOSTRAR FORMULARIO
+     ========================= */
+
+  window.mostrarFormulario =
+    function () {
+
+      formulario.style.display =
+        "block";
+
+      estadoConfirmacion.innerHTML =
+        "";
+
+      ocultarBotonesIniciales();
+
+
+      const botonFormulario =
+        formulario.querySelector(
+          "button"
+        );
+
+
+      if (botonFormulario) {
+
+        botonFormulario.textContent =
+          "Confirmar asistencia";
+
+      }
+
+    };
+
+
+  /* =========================
+     CONFIRMAR ASISTENCIA
+     ========================= */
+
+  window.confirmarAsistencia =
+    async function () {
+
+      try {
+
+        const nombre =
+          nombreInput.value.trim();
+
+        const personas =
+          Number(
+            personasInput.value
+          );
+
+        const evento =
+          eventoInput.value;
+
+        const mensaje =
+          mensajeInput.value.trim();
+
+
+        /* =========================
+           VALIDACIONES
+           ========================= */
+
+        if (!nombre) {
+
+          mostrarAdvertencia(
+            "Falta tu nombre",
+            "Por favor, escribe el nombre de la familia."
+          );
+
+          return;
+
+        }
+
+
+        if (
+          !personas ||
+          personas < 1
+        ) {
+
+          mostrarAdvertencia(
+            "Cantidad de personas",
+            "Indica cuántas personas asistirán."
+          );
+
+          return;
+
+        }
+
+
+        if (!evento) {
+
+          mostrarAdvertencia(
+            "Falta seleccionar",
+            "Indica a qué celebración nos acompañarás."
+          );
+
+          return;
+
+        }
+
+
+        if (!usuarioAnonimo) {
+
+          mostrarAdvertencia(
+            "Conexión no disponible",
+            "Espera unos segundos e intenta nuevamente."
+          );
+
+          return;
+
+        }
+
+
+        console.log(
+          "UID utilizado:",
+          usuarioAnonimo.uid
+        );
+
+
+        const idGuardado =
+          localStorage.getItem(
+            claveConfirmacion
+          );
+
+
+        /* =========================
+           SI YA EXISTE REGISTRO
+           ========================= */
+
+        if (idGuardado) {
+
+          const referencia =
+            doc(
+              db,
+              "invitados",
+              idGuardado
+            );
+
+
+          const resultado =
+            await getDoc(
+              referencia
+            );
+
+
+          if (resultado.exists()) {
+
+            const datos =
+              resultado.data();
+
+
+            if (
+              datos.ownerUid ===
+              usuarioAnonimo.uid
+            ) {
+
+              await updateDoc(
+                referencia,
+                {
+
+                  nombre,
+
+                  personas,
+
+                  evento,
+
+                  mensaje,
+
+                  asistencia:
+                    true,
+
+                  ultimaModificacion:
+                    serverTimestamp()
+
+                }
+              );
+
+
+              formulario.style.display =
+                "none";
+
+
+              const botonFormulario =
+                formulario.querySelector(
+                  "button"
+                );
+
+
+              if (botonFormulario) {
+
+                botonFormulario.textContent =
+                  "Confirmar asistencia";
+
+              }
+
+
+              mostrarEstadoConfirmado();
+
+
+              mostrarPopup(
+                "¡Muchas gracias!",
+                "Tu confirmación ha sido actualizada correctamente. Será un gusto contar contigo en este momento tan especial."
+              );
+
+
+              return;
+
+            } else {
+
+              localStorage.removeItem(
+                claveConfirmacion
+              );
+
+              localStorage.removeItem(
+                claveOwnerUid
+              );
+
+            }
+
+
+          } else {
+
+            localStorage.removeItem(
+              claveConfirmacion
+            );
+
+            localStorage.removeItem(
+              claveOwnerUid
+            );
+
+          }
+
+        }
+
+
+        /* =========================
+           CREAR NUEVO REGISTRO
+           ========================= */
+
+        const nuevoRegistro =
+          await addDoc(
+            collection(
+              db,
+              "invitados"
+            ),
+            {
+
+              nombre,
+
+              asistencia:
+                true,
+
+              personas,
+
+              evento,
+
+              mensaje,
+
+              ownerUid:
+                usuarioAnonimo.uid,
+
+              fechaRegistro:
+                serverTimestamp(),
+
+              ultimaModificacion:
+                serverTimestamp()
+
+            }
+          );
+
+
+        localStorage.setItem(
+          claveConfirmacion,
+          nuevoRegistro.id
+        );
+
+        localStorage.setItem(
+          claveOwnerUid,
+          usuarioAnonimo.uid
+        );
+
+
+        console.log(
+          "Confirmación guardada:",
+          nuevoRegistro.id
+        );
+
+
+        /* =========================
+           LIMPIAR FORMULARIO
+           ========================= */
+
+        nombreInput.value =
+          "";
+
+        personasInput.value =
+          "";
+
+        eventoInput.value =
+          "";
+
+        mensajeInput.value =
+          "";
+
+
+        formulario.style.display =
+          "none";
+
+
+        const botonFormulario =
+          formulario.querySelector(
+            "button"
+          );
+
+
+        if (botonFormulario) {
+
+          botonFormulario.textContent =
+            "Confirmar asistencia";
+
+        }
+
+
+        mostrarEstadoConfirmado();
+
+
+        mostrarPopup(
+          "💛 ¡Muchas gracias!",
+          "Tu asistencia ha sido confirmada correctamente. Será un gusto compartir este momento tan especial contigo."
+        );
+
+
+      } catch (error) {
+
+        console.error(
+          "Error al guardar:",
+          error
+        );
+
+
+        if (
+          error.code ===
+          "permission-denied"
+        ) {
+
+          localStorage.removeItem(
+            claveConfirmacion
+          );
+
+          localStorage.removeItem(
+            claveOwnerUid
+          );
+
+
+          mostrarBotonesIniciales();
+
+
+          mostrarAdvertencia(
+            "No fue posible guardar",
+            "El sistema no permitió registrar la confirmación. Intenta nuevamente."
+          );
+
+
+        } else {
+
+          mostrarAdvertencia(
+            "Ocurrió un problema",
+            "No fue posible guardar tu confirmación. Revisa tu conexión e intenta nuevamente."
+          );
+
+        }
+
+      }
+
+    };
+
+
+  /* =========================
+     COMPROBAR CONFIRMACIÓN
+     ========================= */
+
+  async function comprobarConfirmacion() {
+
+    try {
+
+      if (!usuarioAnonimo) {
+
+        return;
+
+      }
+
+
+      const id =
+        localStorage.getItem(
+          claveConfirmacion
+        );
+
+
+      if (!id) {
+
+        mostrarBotonesIniciales();
+
+        return;
+
+      }
+
+
+      const referencia =
+        doc(
+          db,
+          "invitados",
+          id
+        );
+
+
+      const resultado =
+        await getDoc(
+          referencia
+        );
+
+
+      if (!resultado.exists()) {
+
+        localStorage.removeItem(
+          claveConfirmacion
+        );
+
+        localStorage.removeItem(
+          claveOwnerUid
+        );
+
+        mostrarBotonesIniciales();
+
+        return;
+
+      }
+
+
+      const datos =
+        resultado.data();
+
+
+      if (
+        datos.ownerUid !==
+        usuarioAnonimo.uid
+      ) {
+
+        localStorage.removeItem(
+          claveConfirmacion
+        );
+
+        localStorage.removeItem(
+          claveOwnerUid
+        );
+
+        mostrarBotonesIniciales();
+
+        return;
+
+      }
+
+
+      /* =========================
+         NO ASISTIRÁ
+         ========================= */
+
+      if (
+        datos.asistencia === false
+      ) {
+
+        ocultarBotonesIniciales();
+
+        formulario.style.display =
+          "none";
+
+
+        estadoConfirmacion.innerHTML = `
+
+          <p style="
+            font-size:18px;
+            color:#555;
+            margin-bottom:15px;
+          ">
+            💛 No podrás acompañarnos
+          </p>
+
+          <button
+            class="boton-no-asiste"
+            onclick="cambiarOpinion()"
+          >
+            Cambiar de opinión
+          </button>
+
+        `;
+
+
+      } else {
+
+        /* =========================
+           YA CONFIRMÓ
+           ========================= */
+
+        mostrarEstadoConfirmado();
+
+      }
+
+
+    } catch (error) {
+
+      console.error(
+        "Error comprobando confirmación:",
+        error
+      );
+
+
+      if (
+        error.code ===
+        "permission-denied"
+      ) {
+
+        localStorage.removeItem(
+          claveConfirmacion
+        );
+
+        localStorage.removeItem(
+          claveOwnerUid
+        );
+
+      }
+
+
+      mostrarBotonesIniciales();
+
+    }
+
+  }
+
+
+  /* =========================
+     MOSTRAR POPUP
+     ========================= */
+
+  window.mostrarPopup =
+    function (
+      titulo,
+      texto
+    ) {
+
+      const popup =
+        document.getElementById(
+          "popup"
+        );
+
+      const popupTitulo =
+        document.getElementById(
+          "popupTitulo"
+        );
+
+      const popupTexto =
+        document.getElementById(
+          "popupTexto"
+        );
+
+
+      popupTitulo.innerHTML =
+        titulo;
+
+      popupTexto.textContent =
+        texto;
+
+
+      popup.style.display =
+        "flex";
+
+    };
+
+
+  /* =========================
+     CERRAR POPUP
+     ========================= */
+
+  window.cerrarPopup =
+    function () {
+
+      const popup =
+        document.getElementById(
+          "popup"
+        );
+
+
+      popup.style.display =
+        "none";
+
+
+      /*
+        La música comienza
+        únicamente después
+        de presionar Aceptar.
+      */
+
+      if (musicaPendiente) {
+
+        iniciarMusica();
+
+      }
+
+    };
+
+
+  /* =========================
+     ADVERTENCIAS
+     ========================= */
+
+  function mostrarAdvertencia(
+    titulo,
+    texto
+  ) {
+
+    const tituloConImagen = `
+
+      <img
+        src="img/war.png"
+        class="icono-warning"
+        alt=""
+      >
+
+      ${titulo}
+
+    `;
+
+
+    mostrarPopup(
+      tituloConImagen,
+      texto
+    );
+
+  }
+
+
+  /* =========================
+     COMPROBAR AL INICIAR
+     ========================= */
+
+  await comprobarConfirmacion();
+
+</script>
+
+  
+
+
+  <!-- SCRIPT PRINCIPAL -->
+
+  <script src="script.js"></script>
+
+</body>
+
+</html>

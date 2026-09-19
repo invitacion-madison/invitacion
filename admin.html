@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Admin | Confirmaciones</title>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f8f6f1;
+      color: #333;
+    }
+
+    /* =========================
+       LOGIN
+    ========================= */
+
+    #login {
+      min-height: 90vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-box {
+      width: min(90%, 400px);
+      background: white;
+      padding: 30px 25px;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,.10);
+    }
+
+    .login-box h1 {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+
+    .login-box p {
+      color: #777;
+      margin-bottom: 20px;
+    }
+
+    #email,
+    #password {
+      width: 100%;
+      padding: 13px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    #email:focus,
+    #password:focus {
+      border-color: #d4af37;
+    }
+
+    #entrar {
+      width: 100%;
+      margin-top: 5px;
+      padding: 13px;
+      border: none;
+      border-radius: 10px;
+      background: #d4af37;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #entrar:hover {
+      opacity: .9;
+    }
+
+    #error-login {
+      display: none;
+      color: #c62828;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+
+    /* =========================
+       PANEL
+    ========================= */
+
+    #panel {
+      display: none;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    .titulo {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .titulo h1 {
+      margin-bottom: 5px;
+    }
+
+    .titulo p {
+      color: #777;
+    }
+
+    /* =========================
+       RESUMEN
+    ========================= */
+
+    .resumen {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 25px;
+    }
+
+    .dato {
+      background: white;
+      padding: 18px 10px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+
+    .dato strong {
+      display: block;
+      font-size: 28px;
+      margin-bottom: 5px;
+    }
+
+    /* =========================
+       FILTROS
+    ========================= */
+
+    .filtros {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .filtros button {
+      border: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: #ddd;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .filtros button:hover {
+      background: #ccc;
+    }
+
+    /* =========================
+       LISTA
+    ========================= */
+
+    #lista {
+      width: 100%;
+    }
+
+    .invitado {
+      background: white;
+      margin-bottom: 14px;
+      padding: 18px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+
+    .asiste {
+      border-left: 5px solid #d4af37;
+    }
+
+    .no-asiste {
+      border-left: 5px solid #777;
+      opacity: .75;
+    }
+
+    .nombre {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .info {
+      margin: 6px 0;
+    }
+
+    .evento {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .mensaje {
+      margin-top: 12px;
+      padding: 10px;
+      background: #f5f5f5;
+      border-radius: 8px;
+    }
+
+    .fecha {
+      font-size: 13px;
+      color: #777;
+      margin-top: 10px;
+    }
+
+    .estado {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 5px 9px;
+      border-radius: 6px;
+      font-size: 13px;
+      background: #eee;
+    }
+
+    .vacio {
+      text-align: center;
+      padding: 30px;
+      color: #777;
+      background: white;
+      border-radius: 12px;
+    }
+
+    /* =========================
+       CERRAR SESIÓN
+    ========================= */
+
+    .cerrar {
+      display: block;
+      margin: 25px auto;
+      padding: 11px 20px;
+      border: none;
+      border-radius: 8px;
+      background: #777;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .cerrar:hover {
+      background: #666;
+    }
+
+    /* =========================
+       RECARGAR
+    ========================= */
+
+    .recargar {
+      display: block;
+      margin: 0 auto 20px;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      background: #d4af37;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .recargar:hover {
+      opacity: .9;
+    }
+
+    /* =========================
+       MÓVIL
+    ========================= */
+
+    @media (max-width: 600px) {
+
+      body {
+        padding: 12px;
+      }
+
+      .resumen {
+        grid-template-columns: 1fr;
+      }
+
+      .dato strong {
+        font-size: 24px;
+      }
+
+      .filtros button {
+        flex: 1 1 45%;
+      }
+
+      .invitado {
+        padding: 15px;
+      }
+
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+
+  <!-- =========================
+       LOGIN
+  ========================= -->
+
+  <div id="login">
+
+    <div class="login-box">
+
+      <h1>🔒 Panel privado</h1>
+
+      <p>
+        Inicia sesión para ver las confirmaciones.
+      </p>
+
+      <input
+        type="email"
+        id="email"
+        placeholder="Correo electrónico"
+        autocomplete="username"
+      >
+
+      <input
+        type="password"
+        id="password"
+        placeholder="Contraseña"
+        autocomplete="current-password"
+      >
+
+      <button id="entrar">
+        Iniciar sesión
+      </button>
+
+      <div id="error-login">
+        ❌ Correo o contraseña incorrectos.
+      </div>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- =========================
+       PANEL ADMINISTRADOR
+  ========================= -->
+
+  <div id="panel">
+
+    <div class="titulo">
+
+      <h1>💛 Confirmaciones</h1>
+
+      <p>
+        Panel de administración de la invitación
+      </p>
+
+    </div>
+
+
+    <!-- =========================
+         RESUMEN
+    ========================= -->
+
+    <div class="resumen">
+
+      <div class="dato">
+
+        <strong id="totalPersonas">
+          0
+        </strong>
+
+        Personas confirmadas
+
+      </div>
+
+
+      <div class="dato">
+
+        <strong id="totalConfirmados">
+          0
+        </strong>
+
+        Confirmaciones
+
+      </div>
+
+
+      <div class="dato">
+
+        <strong id="totalNoAsisten">
+          0
+        </strong>
+
+        No asistirán
+
+      </div>
+
+    </div>
+
+
+    <!-- =========================
+         RECARGAR
+    ========================= -->
+
+    <button
+      class="recargar"
+      id="recargar"
+    >
+      🔄 Actualizar confirmaciones
+    </button>
+
+
+    <!-- =========================
+         FILTROS
+    ========================= -->
+
+    <div class="filtros">
+
+      <button onclick="filtrar('todos')">
+        Todos
+      </button>
+
+      <button onclick="filtrar('Ambas celebraciones')">
+        Ambas
+      </button>
+
+      <button onclick="filtrar('Cumpleaños')">
+        Cumpleaños
+      </button>
+
+      <button onclick="filtrar('Bautizo')">
+        Bautizo
+      </button>
+
+      <button onclick="filtrar('No podrá asistir')">
+        No asistirán
+      </button>
+
+    </div>
+
+
+    <!-- =========================
+         LISTA
+    ========================= -->
+
+    <div id="lista">
+
+      <div class="vacio">
+        Cargando confirmaciones...
+      </div>
+
+    </div>
+
+
+    <!-- =========================
+         CERRAR SESIÓN
+    ========================= -->
+
+    <button
+      class="cerrar"
+      id="cerrarSesion"
+    >
+      🔒 Cerrar sesión
+    </button>
+
+  </div>
+
+
+
+  <!-- =========================
+       FIREBASE
+  ========================= -->
+
+  <script type="module">
+
+    import {
+      initializeApp
+    } from
+    "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+
+
+    import {
+      getFirestore,
+      collection,
+      getDocs
+    } from
+    "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      onAuthStateChanged,
+      signOut
+    } from
+    "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+
+
+    /* =========================
+       CONFIGURACIÓN FIREBASE
+    ========================= */
+
+    const firebaseConfig = {
+
+      apiKey:
+        "AIzaSyCyCDHZU4aybUQ715wR7TUr9EZSGXI7GIU",
+
+      authDomain:
+        "invitacion-8aabc.firebaseapp.com",
+
+      projectId:
+        "invitacion-8aabc",
+
+      storageBucket:
+        "invitacion-8aabc.firebasestorage.app",
+
+      messagingSenderId:
+        "227896735643",
+
+      appId:
+        "1:227896735643:web:42eee6643da0160a1f533e",
+
+      measurementId:
+        "G-L6MNRT6PG8"
+
+    };
+
+
+    /* =========================
+       INICIAR FIREBASE
+    ========================= */
+
+    const app =
+      initializeApp(firebaseConfig);
+
+
+    const db =
+      getFirestore(app);
+
+
+    const auth =
+      getAuth(app);
+
+
+    let invitados = [];
+
+
+    /* =========================
+       ELEMENTOS
+    ========================= */
+
+    const login =
+      document.getElementById("login");
+
+    const panel =
+      document.getElementById("panel");
+
+    const email =
+      document.getElementById("email");
+
+    const password =
+      document.getElementById("password");
+
+    const entrar =
+      document.getElementById("entrar");
+
+    const errorLogin =
+      document.getElementById("error-login");
+
+    const cerrarSesion =
+      document.getElementById("cerrarSesion");
+
+    const recargar =
+      document.getElementById("recargar");
+
+
+    /* =========================
+       INICIAR SESIÓN
+    ========================= */
+
+    entrar.addEventListener(
+      "click",
+      iniciarSesion
+    );
+
+
+    password.addEventListener(
+      "keydown",
+      function(event) {
+
+        if (event.key === "Enter") {
+
+          iniciarSesion();
+
+        }
+
+      }
+    );
+
+
+    async function iniciarSesion() {
+
+      const correo =
+        email.value.trim();
+
+      const clave =
+        password.value;
+
+
+      if (!correo || !clave) {
+
+        errorLogin.textContent =
+          "❌ Escribe tu correo y contraseña.";
+
+        errorLogin.style.display =
+          "block";
+
+        return;
+
+      }
+
+
+      entrar.disabled = true;
+
+      entrar.textContent =
+        "Iniciando sesión...";
+
+
+      try {
+
+        await signInWithEmailAndPassword(
+          auth,
+          correo,
+          clave
+        );
+
+
+        errorLogin.style.display =
+          "none";
+
+
+      } catch (error) {
+
+        console.error(error);
+
+        errorLogin.textContent =
+          "❌ Correo o contraseña incorrectos.";
+
+        errorLogin.style.display =
+          "block";
+
+        password.value = "";
+
+        password.focus();
+
+      }
+
+
+      entrar.disabled = false;
+
+      entrar.textContent =
+        "Iniciar sesión";
+
+    }
+
+
+    /* =========================
+       ESTADO DE AUTENTICACIÓN
+    ========================= */
+
+    onAuthStateChanged(
+      auth,
+      async (user) => {
+
+        if (user) {
+
+          /*
+            COMPROBAMOS QUE SEA TU UID
+          */
+
+          if (
+            user.uid !==
+            "Dv08ALxSzRMcW3bsaswS7E8pbXu2"
+          ) {
+
+            await signOut(auth);
+
+            errorLogin.textContent =
+              "❌ Esta cuenta no tiene permiso de administrador.";
+
+            errorLogin.style.display =
+              "block";
+
+            return;
+
+          }
+
+
+          login.style.display =
+            "none";
+
+          panel.style.display =
+            "block";
+
+          cargarInvitados();
+
+        } else {
+
+          login.style.display =
+            "flex";
+
+          panel.style.display =
+            "none";
+
+        }
+
+      }
+    );
+
+
+    /* =========================
+       CERRAR SESIÓN
+    ========================= */
+
+    cerrarSesion.addEventListener(
+      "click",
+      async function() {
+
+        await signOut(auth);
+
+      }
+    );
+
+
+    /* =========================
+       RECARGAR
+    ========================= */
+
+    recargar.addEventListener(
+      "click",
+      function() {
+
+        cargarInvitados();
+
+      }
+    );
+
+
+    /* =========================
+       CARGAR INVITADOS
+    ========================= */
+
+    async function cargarInvitados() {
+
+      const lista =
+        document.getElementById("lista");
+
+
+      lista.innerHTML = `
+
+        <div class="vacio">
+          🔄 Cargando confirmaciones...
+        </div>
+
+      `;
+
+
+      try {
+
+        /*
+          Verificar que sea el administrador
+        */
+
+        const usuario =
+          auth.currentUser;
+
+
+        if (
+          !usuario ||
+          usuario.uid !==
+          "Dv08ALxSzRMcW3bsaswS7E8pbXu2"
+        ) {
+
+          throw new Error(
+            "Usuario no autorizado"
+          );
+
+        }
+
+
+        const consulta =
+          await getDocs(
+            collection(
+              db,
+              "invitados"
+            )
+          );
+
+
+        invitados = [];
+
+
+        consulta.forEach(
+          (documento) => {
+
+            invitados.push({
+
+              id:
+                documento.id,
+
+              ...documento.data()
+
+            });
+
+          }
+        );
+
+
+        /*
+          Ordenar del más reciente
+          al más antiguo
+        */
+
+        invitados.sort(
+          (a, b) => {
+
+            const fechaA =
+              a.fechaRegistro &&
+              typeof a.fechaRegistro.toDate ===
+              "function"
+                ? a.fechaRegistro.toDate().getTime()
+                : 0;
+
+
+            const fechaB =
+              b.fechaRegistro &&
+              typeof b.fechaRegistro.toDate ===
+              "function"
+                ? b.fechaRegistro.toDate().getTime()
+                : 0;
+
+
+            return fechaB - fechaA;
+
+          }
+        );
+
+
+        actualizarResumen();
+
+        mostrarInvitados(
+          invitados
+        );
+
+
+      } catch (error) {
+
+        console.error(
+          "Error al cargar confirmaciones:",
+          error
+        );
+
+
+        lista.innerHTML = `
+
+          <div class="vacio">
+
+            ❌ No se pudieron cargar
+            las confirmaciones.
+
+            <br><br>
+
+            Verifica que las reglas de
+            Firestore estén publicadas
+            correctamente.
+
+          </div>
+
+        `;
+
+      }
+
+    }
+
+
+    /* =========================
+       RESUMEN
+    ========================= */
+
+    function actualizarResumen() {
+
+      let personas = 0;
+
+      let confirmados = 0;
+
+      let noAsisten = 0;
+
+
+      invitados.forEach(
+        (invitado) => {
+
+          if (
+            invitado.asistencia === true
+          ) {
+
+            confirmados++;
+
+            personas +=
+              Number(
+                invitado.personas
+              ) || 0;
+
+          }
+
+
+          if (
+            invitado.asistencia === false
+          ) {
+
+            noAsisten++;
+
+          }
+
+        }
+      );
+
+
+      document.getElementById(
+        "totalPersonas"
+      ).textContent =
+        personas;
+
+
+      document.getElementById(
+        "totalConfirmados"
+      ).textContent =
+        confirmados;
+
+
+      document.getElementById(
+        "totalNoAsisten"
+      ).textContent =
+        noAsisten;
+
+    }
+
+
+    /* =========================
+       MOSTRAR INVITADOS
+    ========================= */
+
+    function mostrarInvitados(
+      lista
+    ) {
+
+      const contenedor =
+        document.getElementById(
+          "lista"
+        );
+
+
+      if (lista.length === 0) {
+
+        contenedor.innerHTML = `
+
+          <div class="vacio">
+
+            No hay confirmaciones
+            para mostrar.
+
+          </div>
+
+        `;
+
+        return;
+
+      }
+
+
+      contenedor.innerHTML = "";
+
+
+      lista.forEach(
+        (invitado) => {
+
+          const tarjeta =
+            document.createElement(
+              "div"
+            );
+
+
+          tarjeta.className =
+            invitado.asistencia === true
+              ? "invitado asiste"
+              : "invitado no-asiste";
+
+
+          /* =========================
+             FECHA DE REGISTRO
+          ========================= */
+
+          let fecha =
+            "";
+
+
+          if (
+            invitado.fechaRegistro &&
+            typeof
+            invitado.fechaRegistro.toDate
+            === "function"
+          ) {
+
+            const fechaFirebase =
+              invitado.fechaRegistro.toDate();
+
+
+            fecha =
+              fechaFirebase.toLocaleString(
+                "es-MX",
+                {
+                  dateStyle:
+                    "medium",
+
+                  timeStyle:
+                    "short"
+                }
+              );
+
+          }
+
+
+          /* =========================
+             ÚLTIMA MODIFICACIÓN
+          ========================= */
+
+          let ultimaModificacion =
+            "";
+
+
+          if (
+            invitado.ultimaModificacion &&
+            typeof
+            invitado.ultimaModificacion.toDate
+            === "function"
+          ) {
+
+            const fechaFirebase =
+              invitado.ultimaModificacion.toDate();
+
+
+            ultimaModificacion =
+              fechaFirebase.toLocaleString(
+                "es-MX",
+                {
+                  dateStyle:
+                    "medium",
+
+                  timeStyle:
+                    "short"
+                }
+              );
+
+          }
+
+
+          /* =========================
+             ESTADO
+          ========================= */
+
+          const estado =
+            invitado.asistencia === true
+              ? "✅ Sí asistirá"
+              : "❌ No podrá asistir";
+
+
+          /* =========================
+             HTML DE TARJETA
+          ========================= */
+
+          tarjeta.innerHTML = `
+
+            <div class="nombre">
+
+              ${escaparHTML(
+                invitado.nombre ||
+                "Sin nombre"
+              )}
+
+            </div>
+
+
+            <div class="estado">
+
+              ${estado}
+
+            </div>
+
+
+            <div class="info">
+
+              👥 Personas:
+
+              <strong>
+                ${
+                  invitado.asistencia === true
+                    ? (
+                        Number(
+                          invitado.personas
+                        ) || 0
+                      )
+                    : 0
+                }
+              </strong>
+
+            </div>
+
+
+            <div class="evento">
+
+              🎉 Evento:
+
+              ${
+                invitado.evento ||
+                "Sin evento"
+              }
+
+            </div>
+
+
+            ${
+              invitado.mensaje
+                ? `
+
+                  <div class="mensaje">
+
+                    💬
+                    ${escaparHTML(
+                      invitado.mensaje
+                    )}
+
+                  </div>
+
+                `
+                : ""
+            }
+
+
+            ${
+              fecha
+                ? `
+
+                  <div class="fecha">
+
+                    📅 Registrado:
+
+                    ${fecha}
+
+                  </div>
+
+                `
+                : ""
+            }
+
+
+            ${
+              ultimaModificacion
+                ? `
+
+                  <div class="fecha">
+
+                    🔄 Última modificación:
+
+                    ${ultimaModificacion}
+
+                  </div>
+
+                `
+                : ""
+            }
+
+          `;
+
+
+          contenedor.appendChild(
+            tarjeta
+          );
+
+        }
+      );
+
+    }
+
+
+    /* =========================
+       ESCAPAR HTML
+    ========================= */
+
+    function escaparHTML(
+      texto
+    ) {
+
+      return String(texto)
+        .replace(
+          /&/g,
+          "&amp;"
+        )
+        .replace(
+          /</g,
+          "&lt;"
+        )
+        .replace(
+          />/g,
+          "&gt;"
+        )
+        .replace(
+          /"/g,
+          "&quot;"
+        )
+        .replace(
+          /'/g,
+          "&#039;"
+        );
+
+    }
+
+
+    /* =========================
+       FILTROS
+    ========================= */
+
+    window.filtrar =
+      function(tipo) {
+
+        if (
+          tipo === "todos"
+        ) {
+
+          mostrarInvitados(
+            invitados
+          );
+
+          return;
+
+        }
+
+
+        const filtrados =
+          invitados.filter(
+            (invitado) => {
+
+              return (
+                invitado.evento ===
+                tipo
+              );
+
+            }
+          );
+
+
+        mostrarInvitados(
+          filtrados
+        );
+
+      };
+
+
+  </script>
+
+</body>
+
+</html>
