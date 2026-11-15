@@ -1,0 +1,90 @@
+INVITACIÓN CUMPLEAÑOS + BAUTIZO (rediseño amarillo y negro)
+===========================================================
+
+ESTRUCTURA
+----------
+invitacion/
+  cumpleanos.html        Página del cumpleaños (video + ubicación + cuestionario)
+  bautizo.html           Página del bautizo (imagen + ubicación + cuestionario)
+  css/estilos.css        Estilos compartidos (paleta amarillo / negro / crema)
+  js/firebase.js         Configuración de Firebase (la de tu proyecto original)
+  js/invitacion.js       Mensaje inicial, música, video y confirmaciones
+  img/                   Aquí van tus recursos (ver abajo)
+  LEEME.txt
+
+RECURSOS QUE DEBES COLOCAR EN img/
+----------------------------------
+No tuve acceso a tus archivos, así que no los inventé. Cópialos con ESTOS nombres:
+  img/cancion.mp3             Tu música de fondo (la misma de antes)
+  img/invitacion-cumple.mp4   Tu video de invitación del cumpleaños
+  img/invitacion-bautizo.png  La imagen de la invitación de bautizo
+  img/portada-cumple.jpg      Portada que se muestra al terminar el video (ver abajo)
+  img/abeja.gif               (opcional) la abejita del mensaje emergente;
+                              si no existe, el mensaje se ve igual sin ella
+
+* Si tu imagen de bautizo tiene otro nombre o formato (.jpg, .webp), renómbrala
+  o cambia la ruta en bautizo.html:  <img id="imgBautizo" src="img/...">
+* Mientras falte el video o la imagen, la página muestra el aviso
+  "estará disponible muy pronto" en lugar de verse rota.
+* Ya no se usan ubi.gif, ubi2.gif ni war.png: los íconos ahora son emojis.
+
+UBICACIONES
+-----------
+- Bautizo: conserva tu enlace de Google Maps de la Iglesia San Judas Tadeo.
+- Cumpleaños: sigue apuntando a https://maps.google.com (como en tu original).
+  Reemplázalo por el enlace real en cumpleanos.html (botón "Ver ubicación de la fiesta").
+
+CÓMO PROBAR
+-----------
+Los módulos de Firebase NO funcionan abriendo el archivo con doble clic (file://).
+Desde la carpeta "invitacion" ejecuta:
+    python3 -m http.server 8000
+y abre http://localhost:8000/cumpleanos.html
+(o usa VS Code con la extensión "Live Server").
+
+Qué comprobar:
+  1. Aparece el mensaje inicial. Al pulsar "Aceptar" comienza la música y,
+     en cumpleanos.html, el video al mismo tiempo, SIN sonido.
+  2. bautizo.html no carga ni muestra ningún video.
+  3. El menú superior queda fijo y cambia entre ambas páginas, marcando la activa.
+  4. Confirma en una página y abre la otra: debe decir "Ya registraste tu
+     asistencia" y permitir editar, sin crear un registro nuevo.
+  5. Al terminar el video aparece la portada y el botón "Ver video de nuevo".
+  6. "No podré asistir" -> "Cambiar de opinión" -> "Sí asistiré" actualiza el
+     mismo registro.
+
+PUBLICAR
+--------
+Sube TODA la carpeta a un hosting estático con HTTPS (Firebase Hosting, Netlify,
+GitHub Pages, etc.). Mantén la estructura de carpetas tal cual.
+
+NOTAS DE FUNCIONAMIENTO
+-----------------------
+- El video usa muted + playsinline y se inicia por JavaScript al aceptar el
+  mensaje inicial (por eso no lleva el atributo "autoplay" escrito en el HTML:
+  con él arrancaría antes de que el invitado acepte). Nunca tiene sonido.
+- Al terminar el video del cumpleaños aparece la PORTADA (img/portada-cumple.jpg)
+  y debajo el botón "Ver video de nuevo". Si el invitado no lo presiona, la
+  portada se queda fija. La misma imagen se usa como "poster" antes de iniciar.
+  Si no colocas la portada, se mantiene el último cuadro del video con el botón.
+  Formato recomendado: JPG o PNG con la misma proporción que el video.
+  Si usas otro nombre, cámbialo en cumpleanos.html (atributo poster del video
+  y la etiqueta <img> dentro de <div class="portada">).
+- Las dos páginas usan la MISMA colección "invitados", los mismos campos
+  (nombre, asistencia, personas, evento, mensaje, ownerUid, fechaRegistro,
+  ultimaModificacion) y las mismas claves de localStorage
+  (confirmacion_invitacion_id y confirmacion_owner_uid). Una confirmación hecha
+  en una página se recupera y edita desde la otra, sin duplicados.
+- El cuestionario conserva las 3 opciones (Ambas celebraciones, Cumpleaños,
+  Bautizo) en las dos páginas; se preselecciona la de la página actual.
+- La música reinicia al cambiar de página (son páginas independientes).
+
+FIREBASE: QUÉ REVISAR
+---------------------
+- No se cambió la configuración ni la autenticación anónima.
+- Si tus reglas de Firestore validan el campo "evento", deben permitir:
+  "Ambas celebraciones", "Cumpleaños", "Bautizo" y "No podrá asistir".
+- Mejoras menores: el nombre admite hasta 100 caracteres y el mensaje hasta 500.
+  Si tus reglas limitan longitudes, verifica que no sean menores.
+- En Authentication debe seguir habilitado el proveedor "Anónimo" y tu dominio
+  de publicación debe estar en "Dominios autorizados".
